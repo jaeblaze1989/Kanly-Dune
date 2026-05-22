@@ -1,0 +1,5 @@
+www/*
+!.dockerignore
+!Dockerfile
+!entrypoint.sh
+!nginx.conf

@@ -1,0 +1,20 @@
+# Build outputs
+kanly-admin
+*.log
+*.pid
+
+# Local runtime/state
+kanly.db
+admin.json
+.kanly-data/
+
+# VCS/editor
+.git
+.gitignore
+.vscode/
+
+# Node
+node_modules/
+
+# Legacy assets not needed in image
+old/

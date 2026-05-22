@@ -1,0 +1,27 @@
+# Go build outputs
+kanly-admin
+*.exe
+*.out
+
+# Runtime/local state
+.kanly-data/
+kanly.db
+admin.json
+dev.log
+dev.pid
+
+# Node.js
+node_modules/
+dist/
+
+# OS/editor noise
+*.DS_Store
+.vscode/
+
+# Temporary and backups
+*.tmp
+*.swp
+*.bak
+
+# Legacy/archived files
+old/

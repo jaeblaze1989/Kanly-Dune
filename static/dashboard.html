@@ -1,0 +1,1242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Kanly Admin Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/style.css" />
+</head>
+<body class="min-h-screen bg-[#030508] text-slate-100 antialiased font-sans relative overflow-x-hidden flex flex-col justify-between">
+    <div class="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_0%_0%,_rgba(223,183,67,0.12),_transparent_45%)]"></div>
+    <div class="pointer-events-none absolute inset-0 flex items-center justify-center opacity-[0.015]">
+        <img src="img/kanly.svg" alt="" class="w-[72vw] max-w-[980px] object-contain blur-[1px]" />
+    </div>
+    <div class="pointer-events-none absolute inset-0 opacity-[0.015]" style="background-image: linear-gradient(#fff 1px, transparent 1px), linear-gradient(90deg, #fff 1px, transparent 1px); background-size: 40px 40px;"></div>
+
+    <header class="relative mx-auto w-full max-w-7xl px-6 pt-6 pb-4 flex justify-between items-center bg-slate-950/40 border-b border-white/5 backdrop-blur-xl">
+        <div class="flex items-center gap-3">
+            <img src="img/kanly.svg" alt="Kanly logo" class="h-9 w-9 object-contain rounded-md ring-1 ring-white/10 bg-black/20 p-1" />
+            <span class="font-mono text-sm tracking-[0.2em] font-bold text-white">KANLY <span class="text-[#dfb743]">MANAGER</span></span>
+        </div>
+        <button id="logout-btn" class="inline-flex items-center gap-2 rounded-xl border border-white/5 bg-white/[0.02] px-4 py-2 font-mono text-xs uppercase tracking-wider text-slate-400 backdrop-blur-sm transition hover:border-white/10 hover:bg-white/5 hover:text-white">
+            Logout &rarr;
+        </button>
+    </header>
+
+    <main class="relative mx-auto my-auto w-full max-w-7xl px-6 py-8 flex-1">
+        <div class="grid gap-6 lg:grid-cols-[220px_minmax(0,1fr)]">
+            <aside class="h-fit rounded-xl border border-white/5 bg-slate-950/60 p-3 lg:sticky lg:top-6">
+                <p class="px-2 pb-2 font-mono text-[10px] uppercase tracking-[0.25em] text-slate-500">Navigation</p>
+                <nav class="grid gap-1">
+                    <button data-view-nav="dashboard" class="view-nav-btn rounded-lg border border-white/5 bg-white/[0.03] px-3 py-2 text-left font-mono text-xs uppercase tracking-wider text-slate-300 transition hover:bg-white/[0.08]">Dashboard</button>
+                    <button data-view-nav="players" class="view-nav-btn rounded-lg border border-transparent px-3 py-2 text-left font-mono text-xs uppercase tracking-wider text-slate-400 transition hover:border-white/10 hover:bg-white/[0.05] hover:text-slate-200">Players</button>
+                    <button data-view-nav="ini" class="view-nav-btn rounded-lg border border-transparent px-3 py-2 text-left font-mono text-xs uppercase tracking-wider text-slate-400 transition hover:border-white/10 hover:bg-white/[0.05] hover:text-slate-200">INI Editor</button>
+                    <button data-view-nav="database" class="view-nav-btn rounded-lg border border-transparent px-3 py-2 text-left font-mono text-xs uppercase tracking-wider text-slate-400 transition hover:border-white/10 hover:bg-white/[0.05] hover:text-slate-200">Database Editor</button>
+                    <button data-view-nav="commands" class="view-nav-btn rounded-lg border border-transparent px-3 py-2 text-left font-mono text-xs uppercase tracking-wider text-slate-400 transition hover:border-white/10 hover:bg-white/[0.05] hover:text-slate-200">Server Commands</button>
+                </nav>
+            </aside>
+
+            <div>
+                <section id="view-dashboard" class="view-panel">
+                    <p class="font-mono text-[#dfb743] mb-3 tracking-widest text-sm">SECURE SESSION ACTIVE</p>
+                    <h1 class="text-3xl md:text-4xl font-bold tracking-tight text-white mb-3">Management Dashboard</h1>
+                    <p class="text-slate-400 max-w-3xl">Operational overview for host resources and container health. Use the left navigation to switch to config editing, database tools, and server command execution.</p>
+
+                    <div class="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-4 text-left">
+                        <article class="rounded-xl border border-white/5 bg-slate-950/60 p-4">
+                            <p class="font-mono text-[11px] uppercase tracking-wider text-slate-500">RAM Usage</p>
+                            <p id="stat-ram" class="mt-2 text-2xl font-bold text-white">--</p>
+                            <p id="stat-ram-detail" class="mt-1 text-xs text-slate-500">Waiting for data...</p>
+                        </article>
+                        <article class="rounded-xl border border-white/5 bg-slate-950/60 p-4">
+                            <p class="font-mono text-[11px] uppercase tracking-wider text-slate-500">Disk Usage</p>
+                            <p id="stat-disk" class="mt-2 text-2xl font-bold text-white">--</p>
+                            <p id="stat-disk-detail" class="mt-1 text-xs text-slate-500">Waiting for data...</p>
+                        </article>
+                        <article class="rounded-xl border border-white/5 bg-slate-950/60 p-4">
+                            <p class="font-mono text-[11px] uppercase tracking-wider text-slate-500">Load Average</p>
+                            <p id="stat-load" class="mt-2 text-2xl font-bold text-white">--</p>
+                            <p id="stat-load-detail" class="mt-1 text-xs text-slate-500">1m / 5m / 15m</p>
+                        </article>
+                        <article class="rounded-xl border border-white/5 bg-slate-950/60 p-4">
+                            <p class="font-mono text-[11px] uppercase tracking-wider text-slate-500">Host Uptime</p>
+                            <p id="stat-uptime" class="mt-2 text-2xl font-bold text-white">--</p>
+                            <p id="stat-updated" class="mt-1 text-xs text-slate-500">Not refreshed yet.</p>
+                        </article>
+                        <article class="rounded-xl border border-white/5 bg-slate-950/60 p-4">
+                            <p class="font-mono text-[11px] uppercase tracking-wider text-slate-500">Live Players</p>
+                            <p id="stat-players-live" class="mt-2 text-2xl font-bold text-white">--</p>
+                            <p id="stat-players-live-detail" class="mt-1 text-xs text-slate-500">From farm state</p>
+                        </article>
+                        <article class="rounded-xl border border-white/5 bg-slate-950/60 p-4">
+                            <p class="font-mono text-[11px] uppercase tracking-wider text-slate-500">Known Players</p>
+                            <p id="stat-players-db" class="mt-2 text-2xl font-bold text-white">--</p>
+                            <p id="stat-players-db-detail" class="mt-1 text-xs text-slate-500">Rows in player_state</p>
+                        </article>
+                        <article class="rounded-xl border border-white/5 bg-slate-950/60 p-4">
+                            <p class="font-mono text-[11px] uppercase tracking-wider text-slate-500">World Partitions</p>
+                            <p id="stat-partitions" class="mt-2 text-2xl font-bold text-white">--</p>
+                            <p id="stat-servers-detail" class="mt-1 text-xs text-slate-500">Active servers: --</p>
+                        </article>
+                    </div>
+
+                    <section class="mt-8 text-left">
+                        <div class="flex items-center justify-between gap-3 mb-3">
+                            <h2 class="font-mono text-sm uppercase tracking-[0.25em] text-slate-300">Dune Containers</h2>
+                            <span id="containers-updated" class="font-mono text-xs text-slate-500">Waiting for data...</span>
+                        </div>
+                        <div class="rounded-xl border border-white/5 bg-slate-950/60 overflow-hidden">
+                            <div class="overflow-x-auto">
+                                <table class="w-full min-w-[900px] text-left font-mono text-xs">
+                                    <thead class="bg-white/[0.03] text-slate-500 uppercase tracking-wider">
+                                        <tr>
+                                            <th class="px-3 py-2">Container</th>
+                                            <th class="px-3 py-2">Status</th>
+                                            <th class="px-3 py-2">CPU</th>
+                                            <th class="px-3 py-2">Memory</th>
+                                            <th class="px-3 py-2">Mem %</th>
+                                            <th class="px-3 py-2">Net I/O</th>
+                                            <th class="px-3 py-2">Block I/O</th>
+                                            <th class="px-3 py-2">PIDs</th>
+                                            <th class="px-3 py-2">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="containers-body" class="text-slate-300"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="mt-8 text-left">
+                        <div class="rounded-xl border border-white/5 bg-slate-950/50 p-4">
+                            <div class="flex items-center justify-between gap-3 mb-3">
+                                <h2 class="font-mono text-sm uppercase tracking-[0.25em] text-slate-300">Quick Actions</h2>
+                                <span id="quick-actions-status" class="font-mono text-xs text-slate-500">Choose an action below.</span>
+                            </div>
+
+                            <div class="grid gap-3 md:grid-cols-2">
+                                <article class="rounded-lg border border-white/5 bg-black/20 p-3">
+                                    <p class="font-mono text-[11px] uppercase tracking-wider text-slate-400">Restart Service</p>
+                                    <select id="quick-restart-target" class="mt-2 w-full rounded-md border border-white/10 bg-black/30 px-2 py-2 font-mono text-xs text-slate-200">
+                                        <option value="survival-1">Survival-1</option>
+                                        <option value="overmap">Overmap</option>
+                                        <option value="gateway">Gateway</option>
+                                        <option value="director">Director</option>
+                                        <option value="text-router">Text Router</option>
+                                    </select>
+                                    <button id="quick-restart-btn" class="mt-2 w-full rounded-md bg-white/[0.08] px-3 py-2 font-mono text-xs uppercase tracking-wider text-slate-200 hover:bg-white/[0.14] transition">Restart</button>
+                                </article>
+
+                                <article class="rounded-lg border border-white/5 bg-black/20 p-3">
+                                    <p class="font-mono text-[11px] uppercase tracking-wider text-slate-400">View Logs</p>
+                                    <select id="quick-logs-service" class="mt-2 w-full rounded-md border border-white/10 bg-black/30 px-2 py-2 font-mono text-xs text-slate-200">
+                                        <option value="survival">Survival</option>
+                                        <option value="overmap">Overmap</option>
+                                        <option value="gateway">Gateway</option>
+                                        <option value="director">Director</option>
+                                        <option value="text-router">Text Router</option>
+                                        <option value="postgres">Postgres</option>
+                                        <option value="rmq-game">RMQ Game</option>
+                                        <option value="rmq-admin">RMQ Admin</option>
+                                    </select>
+                                    <label class="mt-2 inline-flex items-center gap-2 font-mono text-[11px] text-slate-500">
+                                        <input id="quick-logs-raw" type="checkbox" class="h-3.5 w-3.5 rounded border-white/20 bg-black/40 text-[#dfb743]" />
+                                        Include raw output
+                                    </label>
+                                    <button id="quick-logs-btn" class="mt-2 w-full rounded-md bg-white/[0.08] px-3 py-2 font-mono text-xs uppercase tracking-wider text-slate-200 hover:bg-white/[0.14] transition">Show Logs</button>
+                                </article>
+                            </div>
+
+                            <div class="mt-3 grid gap-2 md:grid-cols-2">
+                                <button id="quick-doctor-btn" class="rounded-md border border-white/10 bg-white/[0.03] px-3 py-2 font-mono text-xs uppercase tracking-wider text-slate-300 hover:bg-white/[0.08] transition">Run Doctor Check</button>
+                                <button id="quick-stop-btn" class="rounded-md border border-rose-900/40 bg-rose-950/20 px-3 py-2 font-mono text-xs uppercase tracking-wider text-rose-300 hover:bg-rose-900/30 transition">Stop Battlegroup</button>
+                            </div>
+                        </div>
+                    </section>
+                </section>
+
+                <section id="view-players" class="view-panel hidden">
+                    <h1 class="text-2xl md:text-3xl font-bold tracking-tight text-white mb-2">Players</h1>
+                    <p class="text-slate-400 mb-6">Live and known player records from the game database.</p>
+
+                    <div class="mb-4 grid gap-3 md:grid-cols-3 text-left">
+                        <article class="rounded-xl border border-white/5 bg-slate-950/60 p-4">
+                            <p class="font-mono text-[11px] uppercase tracking-wider text-slate-500">Live Players</p>
+                            <p id="players-page-live" class="mt-2 text-2xl font-bold text-white">--</p>
+                        </article>
+                        <article class="rounded-xl border border-white/5 bg-slate-950/60 p-4">
+                            <p class="font-mono text-[11px] uppercase tracking-wider text-slate-500">Known Players</p>
+                            <p id="players-page-known" class="mt-2 text-2xl font-bold text-white">--</p>
+                        </article>
+                        <article class="rounded-xl border border-white/5 bg-slate-950/60 p-4">
+                            <p class="font-mono text-[11px] uppercase tracking-wider text-slate-500">Active Servers</p>
+                            <p id="players-page-active-servers" class="mt-2 text-2xl font-bold text-white">--</p>
+                        </article>
+                    </div>
+
+                    <section class="text-left">
+                        <div class="flex items-center justify-between gap-3 mb-3">
+                            <h2 class="font-mono text-sm uppercase tracking-[0.25em] text-slate-300">Known Player List</h2>
+                            <span id="players-updated" class="font-mono text-xs text-slate-500">Waiting for data...</span>
+                        </div>
+                        <div class="rounded-xl border border-white/5 bg-slate-950/60 overflow-hidden">
+                            <div class="overflow-x-auto">
+                                <table class="w-full min-w-[900px] text-left font-mono text-xs">
+                                    <thead class="bg-white/[0.03] text-slate-500 uppercase tracking-wider">
+                                        <tr>
+                                            <th class="px-3 py-2">Status</th>
+                                            <th class="px-3 py-2">Name</th>
+                                            <th class="px-3 py-2">Player State ID</th>
+                                            <th class="px-3 py-2">Server ID</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="player-list-body" class="text-slate-300"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </section>
+                </section>
+
+                <section id="view-ini" class="view-panel hidden">
+                    <h1 class="text-2xl md:text-3xl font-bold tracking-tight text-white mb-2">INI Editor</h1>
+                    <p class="text-slate-400 mb-6">Manage per-map UserGame.ini and UserEngine.ini settings from one place.</p>
+                    <div class="flex items-center justify-between gap-3 mb-3">
+                        <h2 class="font-mono text-sm uppercase tracking-[0.25em] text-slate-300">Map INI Editor</h2>
+                        <span id="map-editor-status" class="font-mono text-xs text-slate-500">Select a map to load configs.</span>
+                    </div>
+
+                    <div class="rounded-xl border border-white/5 bg-slate-950/60 p-4">
+                        <div class="grid gap-4 md:grid-cols-[220px_1fr_1fr]">
+                            <div>
+                                <label class="block font-mono text-[11px] uppercase tracking-wider text-slate-500 mb-2">Map</label>
+                                <select id="map-select" class="w-full rounded-lg border border-white/10 bg-black/30 px-3 py-2 font-mono text-xs text-slate-200"></select>
+                                <label class="mt-3 inline-flex items-center gap-2 font-mono text-[11px] text-slate-400">
+                                    <input id="map-restart-toggle" type="checkbox" class="h-4 w-4 rounded border-white/20 bg-black/40 text-[#dfb743]" />
+                                    Restart selected map after save
+                                </label>
+                                <button id="map-load-btn" class="mt-2 w-full rounded-lg border border-white/10 bg-white/[0.03] px-3 py-2 font-mono text-xs uppercase tracking-wider text-slate-200 hover:bg-white/[0.08] transition">Load</button>
+                                <button id="map-save-btn" class="mt-2 w-full rounded-lg bg-gradient-to-r from-[#dfb743] to-[#ff6b00] px-3 py-2 font-mono text-xs uppercase tracking-wider text-slate-950 font-bold hover:brightness-110 transition">Save Both INI Files</button>
+                            </div>
+
+                            <div>
+                                <label class="block font-mono text-[11px] uppercase tracking-wider text-slate-500 mb-2">UserGame.ini</label>
+                                <textarea id="user-game-ini" class="h-72 w-full rounded-lg border border-white/10 bg-black/30 p-3 font-mono text-xs text-slate-200 outline-none focus:border-[#dfb743]/40"></textarea>
+                            </div>
+
+                            <div>
+                                <label class="block font-mono text-[11px] uppercase tracking-wider text-slate-500 mb-2">UserEngine.ini</label>
+                                <textarea id="user-engine-ini" class="h-72 w-full rounded-lg border border-white/10 bg-black/30 p-3 font-mono text-xs text-slate-200 outline-none focus:border-[#dfb743]/40"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="view-database" class="view-panel hidden">
+                    <h1 class="text-2xl md:text-3xl font-bold tracking-tight text-white mb-2">Database Editor</h1>
+                    <p class="text-slate-400 mb-6">Run safe database operations and export backups for maintenance workflows.</p>
+
+                    <div class="mb-4 flex items-center justify-between gap-3">
+                        <h2 class="font-mono text-sm uppercase tracking-[0.25em] text-slate-300">Database Insights</h2>
+                        <span id="db-insights-status" class="font-mono text-xs text-slate-500">Loading database insights...</span>
+                    </div>
+
+                    <div class="mb-4 grid gap-3 md:grid-cols-2 xl:grid-cols-4 text-left">
+                        <article class="rounded-xl border border-white/5 bg-slate-950/60 p-4">
+                            <p class="font-mono text-[11px] uppercase tracking-wider text-slate-500">Live Players</p>
+                            <p id="db-live-players" class="mt-2 text-2xl font-bold text-white">--</p>
+                        </article>
+                        <article class="rounded-xl border border-white/5 bg-slate-950/60 p-4">
+                            <p class="font-mono text-[11px] uppercase tracking-wider text-slate-500">Player State Rows</p>
+                            <p id="db-player-state-rows" class="mt-2 text-2xl font-bold text-white">--</p>
+                        </article>
+                        <article class="rounded-xl border border-white/5 bg-slate-950/60 p-4">
+                            <p class="font-mono text-[11px] uppercase tracking-wider text-slate-500">Active Servers</p>
+                            <p id="db-active-servers" class="mt-2 text-2xl font-bold text-white">--</p>
+                        </article>
+                        <article class="rounded-xl border border-white/5 bg-slate-950/60 p-4">
+                            <p class="font-mono text-[11px] uppercase tracking-wider text-slate-500">World Partitions</p>
+                            <p id="db-world-partitions" class="mt-2 text-2xl font-bold text-white">--</p>
+                        </article>
+                    </div>
+
+                    <div class="mb-4 grid gap-4 xl:grid-cols-2">
+                        <section class="rounded-xl border border-white/5 bg-slate-950/50 p-4">
+                            <h3 class="font-mono text-[11px] uppercase tracking-[0.2em] text-[#dfb743]">Farm Servers (Connected Players)</h3>
+                            <div class="mt-3 overflow-x-auto">
+                                <table class="w-full min-w-[420px] text-left font-mono text-xs">
+                                    <thead class="bg-white/[0.03] text-slate-500 uppercase tracking-wider">
+                                        <tr>
+                                            <th class="px-3 py-2">Server ID</th>
+                                            <th class="px-3 py-2">Connected Players</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="db-farm-body" class="text-slate-300"></tbody>
+                                </table>
+                            </div>
+                        </section>
+
+                        <section class="rounded-xl border border-white/5 bg-slate-950/50 p-4">
+                            <h3 class="font-mono text-[11px] uppercase tracking-[0.2em] text-[#dfb743]">Player/Server Related Tables</h3>
+                            <div class="mt-3 overflow-x-auto">
+                                <table class="w-full min-w-[420px] text-left font-mono text-xs">
+                                    <thead class="bg-white/[0.03] text-slate-500 uppercase tracking-wider">
+                                        <tr>
+                                            <th class="px-3 py-2">Table</th>
+                                            <th class="px-3 py-2">Estimated Rows</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="db-related-body" class="text-slate-300"></tbody>
+                                </table>
+                            </div>
+                        </section>
+                    </div>
+
+                    <div class="rounded-xl border border-white/5 bg-slate-950/50 p-4">
+                        <div class="grid gap-3 md:grid-cols-[minmax(0,1fr)_auto] md:items-end">
+                            <div>
+                                <label class="block font-mono text-[11px] uppercase tracking-wider text-slate-500">Backup Output Directory</label>
+                                <input id="quick-db-output" type="text" class="mt-2 w-full rounded-md border border-white/10 bg-black/30 px-3 py-2 font-mono text-xs text-slate-200" placeholder="Optional output directory" />
+                                <p class="mt-2 text-xs text-slate-500">Leave empty to use the default runtime backup location.</p>
+                            </div>
+                            <button id="quick-db-backup-btn" class="rounded-md bg-white/[0.08] px-4 py-2 font-mono text-xs uppercase tracking-wider text-slate-200 hover:bg-white/[0.14] transition">Run Backup</button>
+                        </div>
+                    </div>
+
+                    <div class="mt-4 rounded-xl border border-white/5 bg-slate-950/40 p-4 text-slate-400 text-sm">Live database analysis is now wired from dune-postgres. Next tools can include restore, partition cleanup, and integrity checks.</div>
+                </section>
+
+                <section id="view-commands" class="view-panel hidden">
+                    <h1 class="text-2xl md:text-3xl font-bold tracking-tight text-white mb-2">Server Commands</h1>
+                    <p class="text-slate-400 mb-6">Run Dune wrapper commands and inspect parsed summaries with raw command output.</p>
+
+                    <div class="grid gap-4 xl:grid-cols-[minmax(0,1fr)_420px] text-left">
+                        <div>
+                            <div class="flex items-center justify-between gap-3 mb-4">
+                                <h2 class="font-mono text-sm uppercase tracking-[0.25em] text-slate-300">Server Control Panel</h2>
+                                <button id="commands-refresh-btn" class="inline-flex items-center gap-2 rounded-lg border border-white/10 bg-white/[0.02] px-3 py-1.5 font-mono text-[11px] uppercase tracking-wider text-slate-300 hover:bg-white/[0.06] transition">Refresh Commands</button>
+                            </div>
+
+                            <div id="commands-status" class="mb-3 font-mono text-xs text-slate-500">Loading Dune command catalog...</div>
+                            <div id="commands-panel" class="grid gap-4"></div>
+                        </div>
+
+                        <aside class="rounded-xl border border-white/5 bg-slate-950/70 p-4 h-fit xl:sticky xl:top-4">
+                            <div class="flex items-center justify-between gap-2">
+                                <p class="font-mono text-[11px] uppercase tracking-wider text-slate-400">Command Console</p>
+                                <span id="command-run-meta" class="font-mono text-[11px] text-slate-600">No command run yet</span>
+                            </div>
+                            <div id="command-summary" class="mt-3 hidden rounded-lg border border-white/5 bg-black/20 p-3"></div>
+                            <pre id="command-output" class="mt-3 h-[28rem] overflow-auto whitespace-pre-wrap break-words rounded-lg border border-white/5 bg-black/30 p-3 font-mono text-xs text-slate-300">Select and run a command to view output.</pre>
+                        </aside>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </main>
+
+    <footer class="w-full text-center py-6 font-mono text-[10px] text-slate-600 tracking-wider">
+        BY ORDER OF THE IMPERIAL THRONE // KANLY STACK V1.0.0 copyright © 2026 // DESIGNED BY HEXASPARK.<br>
+        Dune Docker package provided by Red-Blink <a href="https://github.com/Red-Blink/dune-awakening-selfhost-docker" class="text-kanly-gold hover:underline">here</a>.<br>
+        This project is not affiliated with, endorsed by, sponsored by, or supported by Funcom.
+    </footer>
+
+    <script>
+        let duneCommands = [];
+        let currentView = 'dashboard';
+
+        function updateNavButtons(activeView) {
+            document.querySelectorAll('.view-nav-btn').forEach((button) => {
+                if (!(button instanceof HTMLElement)) {
+                    return;
+                }
+                const view = button.getAttribute('data-view-nav');
+                const active = view === activeView;
+                button.classList.toggle('bg-white/[0.03]', active);
+                button.classList.toggle('border-white/5', active);
+                button.classList.toggle('text-slate-300', active);
+                button.classList.toggle('border-transparent', !active);
+                button.classList.toggle('text-slate-400', !active);
+            });
+        }
+
+        function switchView(view) {
+            const allowed = ['dashboard', 'players', 'ini', 'database', 'commands'];
+            const nextView = allowed.includes(view) ? view : 'dashboard';
+            currentView = nextView;
+
+            document.querySelectorAll('.view-panel').forEach((panel) => {
+                if (!(panel instanceof HTMLElement)) {
+                    return;
+                }
+                const shouldShow = panel.id === `view-${nextView}`;
+                panel.classList.toggle('hidden', !shouldShow);
+            });
+
+            updateNavButtons(nextView);
+            if (window.location.hash !== `#${nextView}`) {
+                window.location.hash = nextView;
+            }
+        }
+
+        function setText(id, value) {
+            const node = document.getElementById(id);
+            if (node) {
+                node.textContent = value;
+            }
+        }
+
+        function formatBytes(bytes) {
+            if (!Number.isFinite(bytes) || bytes < 0) {
+                return '--';
+            }
+            const units = ['B', 'KB', 'MB', 'GB', 'TB'];
+            let value = bytes;
+            let index = 0;
+            while (value >= 1024 && index < units.length - 1) {
+                value /= 1024;
+                index += 1;
+            }
+            return `${value.toFixed(value >= 10 ? 0 : 1)} ${units[index]}`;
+        }
+
+        function formatDuration(seconds) {
+            if (!Number.isFinite(seconds) || seconds < 0) {
+                return '--';
+            }
+            const total = Math.floor(seconds);
+            const days = Math.floor(total / 86400);
+            const hours = Math.floor((total % 86400) / 3600);
+            const minutes = Math.floor((total % 3600) / 60);
+            if (days > 0) {
+                return `${days}d ${hours}h ${minutes}m`;
+            }
+            if (hours > 0) {
+                return `${hours}h ${minutes}m`;
+            }
+            return `${minutes}m`;
+        }
+
+        function formatNumber(value) {
+            if (!Number.isFinite(value)) {
+                return '--';
+            }
+            return value.toLocaleString();
+        }
+
+        function setDatabaseInsightsUnavailable(message = 'Database insights unavailable') {
+            setText('stat-players-live', '--');
+            setText('stat-players-live-detail', message);
+            setText('stat-players-db', '--');
+            setText('stat-players-db-detail', message);
+            setText('stat-partitions', '--');
+            setText('stat-servers-detail', 'Active servers: --');
+
+            setText('db-live-players', '--');
+            setText('db-player-state-rows', '--');
+            setText('db-active-servers', '--');
+            setText('db-world-partitions', '--');
+
+            const farmBody = document.getElementById('db-farm-body');
+            if (farmBody) {
+                farmBody.innerHTML = '<tr><td colspan="2" class="px-3 py-3 text-slate-500">No data.</td></tr>';
+            }
+
+            const relatedBody = document.getElementById('db-related-body');
+            if (relatedBody) {
+                relatedBody.innerHTML = '<tr><td colspan="2" class="px-3 py-3 text-slate-500">No data.</td></tr>';
+            }
+
+            const playersBody = document.getElementById('player-list-body');
+            if (playersBody) {
+                playersBody.innerHTML = '<tr><td colspan="4" class="px-3 py-3 text-slate-500">No data.</td></tr>';
+            }
+
+            setText('players-page-live', '--');
+            setText('players-page-known', '--');
+            setText('players-page-active-servers', '--');
+
+            const playersUpdated = document.getElementById('players-updated');
+            if (playersUpdated) {
+                playersUpdated.textContent = message;
+                playersUpdated.className = 'font-mono text-xs text-rose-400';
+            }
+
+            const status = document.getElementById('db-insights-status');
+            if (status) {
+                status.textContent = message;
+                status.className = 'font-mono text-xs text-rose-400';
+            }
+        }
+
+        function renderFarmRows(rows) {
+            const body = document.getElementById('db-farm-body');
+            if (!body) {
+                return;
+            }
+            if (!Array.isArray(rows) || rows.length === 0) {
+                body.innerHTML = '<tr><td colspan="2" class="px-3 py-3 text-slate-500">No farm_state rows found.</td></tr>';
+                return;
+            }
+
+            body.innerHTML = rows.map((row) => `<tr class="border-t border-white/5"><td class="px-3 py-2 text-slate-300">${escapeHtml(row.server_id || '--')}</td><td class="px-3 py-2 text-slate-200">${formatNumber(Number(row.connected_players || 0))}</td></tr>`).join('');
+        }
+
+        function renderRelatedTableRows(rows) {
+            const body = document.getElementById('db-related-body');
+            if (!body) {
+                return;
+            }
+            if (!Array.isArray(rows) || rows.length === 0) {
+                body.innerHTML = '<tr><td colspan="2" class="px-3 py-3 text-slate-500">No related tables found.</td></tr>';
+                return;
+            }
+
+            body.innerHTML = rows.slice(0, 40).map((row) => `<tr class="border-t border-white/5"><td class="px-3 py-2 text-slate-300">${escapeHtml(row.table || '--')}</td><td class="px-3 py-2 text-slate-200">${formatNumber(Number(row.estimated_rows || 0))}</td></tr>`).join('');
+        }
+
+        function renderPlayerRows(rows) {
+            const body = document.getElementById('player-list-body');
+            if (!body) {
+                return;
+            }
+            if (!Array.isArray(rows) || rows.length === 0) {
+                body.innerHTML = '<tr><td colspan="4" class="px-3 py-3 text-slate-500">No player names found.</td></tr>';
+                return;
+            }
+
+            const sorted = [...rows].sort((a, b) => {
+                const statusA = String(a && a.status ? a.status : '').toLowerCase();
+                const statusB = String(b && b.status ? b.status : '').toLowerCase();
+                const rankA = statusA === 'online' ? 0 : (statusA === 'offline' ? 1 : 2);
+                const rankB = statusB === 'online' ? 0 : (statusB === 'offline' ? 1 : 2);
+                if (rankA !== rankB) {
+                    return rankA - rankB;
+                }
+                const nameA = String(a && a.name ? a.name : '');
+                const nameB = String(b && b.name ? b.name : '');
+                return nameA.localeCompare(nameB, undefined, { sensitivity: 'base' });
+            });
+
+            body.innerHTML = sorted.slice(0, 80).map((row) => {
+                const statusRaw = String(row && row.status ? row.status : 'Unknown');
+                const statusLower = statusRaw.toLowerCase();
+                const statusTone = statusLower === 'online' ? 'bg-emerald-400' : (statusLower === 'offline' ? 'bg-slate-400' : 'bg-amber-400');
+                return `<tr class="border-t border-white/5">
+                    <td class="px-3 py-2"><span class="inline-flex items-center gap-2"><span class="h-2 w-2 rounded-full ${statusTone}"></span><span class="text-slate-300">${escapeHtml(statusRaw)}</span></span></td>
+                    <td class="px-3 py-2 text-slate-200">${escapeHtml(row.name || '--')}</td>
+                    <td class="px-3 py-2 text-slate-300">${formatNumber(Number(row.player_state_id || 0))}</td>
+                    <td class="px-3 py-2 text-slate-400">${escapeHtml(row.server_id || '--')}</td>
+                </tr>`;
+            }).join('');
+        }
+
+        async function refreshDatabaseInsights() {
+            const status = document.getElementById('db-insights-status');
+            if (status) {
+                status.textContent = 'Refreshing database insights...';
+                status.className = 'font-mono text-xs text-slate-500';
+            }
+
+            try {
+                const response = await fetch('/api/system/database/insights');
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+
+                const payload = await response.json();
+                const summary = payload.summary || {};
+
+                const livePlayers = Number(summary.live_players || 0);
+                const knownPlayers = Number(summary.player_state_rows || 0);
+                const activeServers = Number(summary.active_servers || 0);
+                const worldPartitions = Number(summary.world_partitions || 0);
+
+                setText('stat-players-live', formatNumber(livePlayers));
+                setText('stat-players-live-detail', 'From dune.farm_state');
+                setText('stat-players-db', formatNumber(knownPlayers));
+                setText('stat-players-db-detail', 'Rows in dune.player_state');
+                setText('stat-partitions', formatNumber(worldPartitions));
+                setText('stat-servers-detail', `Active servers: ${formatNumber(activeServers)}`);
+
+                setText('db-live-players', formatNumber(livePlayers));
+                setText('db-player-state-rows', formatNumber(knownPlayers));
+                setText('db-active-servers', formatNumber(activeServers));
+                setText('db-world-partitions', formatNumber(worldPartitions));
+                setText('players-page-live', formatNumber(livePlayers));
+                setText('players-page-known', formatNumber(knownPlayers));
+                setText('players-page-active-servers', formatNumber(activeServers));
+
+                renderFarmRows(payload.farm || []);
+                renderPlayerRows(payload.players || []);
+                renderRelatedTableRows(payload.player_related_tables || []);
+                setText('stat-players-live-detail', 'From dune.farm_state');
+
+                const playersUpdated = document.getElementById('players-updated');
+                if (playersUpdated) {
+                    playersUpdated.textContent = `Updated ${new Date().toLocaleTimeString()}`;
+                    playersUpdated.className = 'font-mono text-xs text-emerald-400';
+                }
+
+                if (status) {
+                    status.textContent = `Updated ${new Date().toLocaleTimeString()}`;
+                    status.className = 'font-mono text-xs text-emerald-400';
+                }
+            } catch (err) {
+                setDatabaseInsightsUnavailable(`Failed to refresh (${err.message || 'error'})`);
+            }
+        }
+
+        async function refreshStats() {
+            try {
+                const response = await fetch('/api/system/stats');
+                if (!response.ok) {
+                    throw new Error('stats request failed');
+                }
+
+                const stats = await response.json();
+                const memory = stats.memory || {};
+                const disk = stats.disk || {};
+                const load = stats.load_average || {};
+
+                setText('stat-ram', `${(memory.used_percent || 0).toFixed(1)}%`);
+                setText('stat-ram-detail', `${formatBytes(memory.used_bytes)} / ${formatBytes(memory.total_bytes)}`);
+
+                setText('stat-disk', `${(disk.used_percent || 0).toFixed(1)}%`);
+                setText('stat-disk-detail', `${formatBytes(disk.used_bytes)} / ${formatBytes(disk.total_bytes)} (${disk.path || '/'})`);
+
+                setText('stat-load', `${(load.one || 0).toFixed(2)} / ${(load.five || 0).toFixed(2)} / ${(load.fifteen || 0).toFixed(2)}`);
+                setText('stat-uptime', formatDuration(stats.uptime_sec));
+
+                const now = new Date();
+                setText('stat-updated', `Updated ${now.toLocaleTimeString()}`);
+            } catch (e) {
+                setText('stat-ram', '--');
+                setText('stat-ram-detail', 'Stats unavailable');
+                setText('stat-disk', '--');
+                setText('stat-disk-detail', 'Stats unavailable');
+                setText('stat-load', '--');
+                setText('stat-uptime', '--');
+                setText('stat-updated', 'Unable to refresh stats');
+            }
+        }
+
+        async function refreshContainers() {
+            const tbody = document.getElementById('containers-body');
+            const updated = document.getElementById('containers-updated');
+            if (!tbody || !updated) {
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/system/containers');
+                if (!response.ok) {
+                    throw new Error('container request failed');
+                }
+                const payload = await response.json();
+                const containers = Array.isArray(payload.containers) ? payload.containers : [];
+
+                if (containers.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="9" class="px-3 py-3 text-slate-500">No dune containers running.</td></tr>';
+                } else {
+                    tbody.innerHTML = containers.map((item) => {
+                        const service = mapContainerNameToService(item.name || '');
+                        const restartTarget = mapContainerNameToRestartTarget(item.name || '');
+                        const logsButton = `<button data-container-logs="${escapeHtml(service)}" class="rounded border border-white/10 px-2 py-1 text-[10px] uppercase tracking-wider text-slate-200 hover:bg-white/[0.08] ${service ? '' : 'opacity-40 cursor-not-allowed'}" ${service ? '' : 'disabled'}>Logs</button>`;
+                        const restartButton = `<button data-container-restart="${escapeHtml(restartTarget)}" class="rounded border border-white/10 px-2 py-1 text-[10px] uppercase tracking-wider text-slate-200 hover:bg-white/[0.08] ${restartTarget ? '' : 'opacity-40 cursor-not-allowed'}" ${restartTarget ? '' : 'disabled'}>Restart</button>`;
+                        return `<tr class="border-t border-white/5">
+                            <td class="px-3 py-2 text-slate-200">${escapeHtml(item.name || '--')}</td>
+                            <td class="px-3 py-2">${escapeHtml(item.status || '--')}</td>
+                            <td class="px-3 py-2">${escapeHtml(item.cpu || '--')}</td>
+                            <td class="px-3 py-2">${escapeHtml(item.mem_usage || '--')}</td>
+                            <td class="px-3 py-2">${escapeHtml(item.mem_percent || '--')}</td>
+                            <td class="px-3 py-2">${escapeHtml(item.net_io || '--')}</td>
+                            <td class="px-3 py-2">${escapeHtml(item.block_io || '--')}</td>
+                            <td class="px-3 py-2">${escapeHtml(item.pids || '--')}</td>
+                            <td class="px-3 py-2"><div class="flex items-center gap-2">${logsButton}${restartButton}</div></td>
+                        </tr>`;
+                    }).join('');
+                }
+
+                updated.textContent = `Updated ${new Date().toLocaleTimeString()}`;
+            } catch (err) {
+                tbody.innerHTML = '<tr><td colspan="9" class="px-3 py-3 text-rose-400">Failed to load container data.</td></tr>';
+                updated.textContent = 'Failed to refresh';
+            }
+        }
+
+        function mapContainerNameToService(containerName) {
+            const direct = {
+                'dune-postgres': 'postgres',
+                'dune-rmq-admin': 'rmq-admin',
+                'dune-rmq-game': 'rmq-game',
+                'dune-text-router': 'text-router',
+                'dune-director': 'director',
+                'dune-server-gateway': 'gateway',
+                'dune-server-survival-1': 'survival',
+                'dune-server-overmap': 'overmap',
+            };
+            if (direct[containerName]) {
+                return direct[containerName];
+            }
+            if (containerName.startsWith('dune-server-')) {
+                return containerName.replace('dune-server-', '');
+            }
+            return '';
+        }
+
+        function mapContainerNameToRestartTarget(containerName) {
+            const direct = {
+                'dune-server-survival-1': 'survival-1',
+                'dune-server-overmap': 'overmap',
+                'dune-server-gateway': 'gateway',
+                'dune-director': 'director',
+                'dune-text-router': 'text-router',
+            };
+            return direct[containerName] || '';
+        }
+
+        function mapNameToRestartTarget(mapName) {
+            if (mapName === 'survival' || mapName === 'survival-1') {
+                return 'survival-1';
+            }
+            if (mapName === 'overmap') {
+                return 'overmap';
+            }
+            return '';
+        }
+
+        async function loadMapConfigs(preferredMap = '') {
+            const status = document.getElementById('map-editor-status');
+            const select = document.getElementById('map-select');
+            const game = document.getElementById('user-game-ini');
+            const engine = document.getElementById('user-engine-ini');
+            if (!status || !select || !game || !engine) {
+                return;
+            }
+
+            let url = '/api/system/map-configs';
+            const selected = preferredMap || select.value;
+            if (selected) {
+                url += `?map=${encodeURIComponent(selected)}`;
+            }
+
+            status.textContent = 'Loading map config files...';
+            status.className = 'font-mono text-xs text-slate-500';
+            try {
+                const response = await fetch(url);
+                const payload = await response.json();
+                if (!response.ok) {
+                    throw new Error(payload.message || 'failed to load map configs');
+                }
+
+                const maps = Array.isArray(payload.maps) ? payload.maps : [];
+                const currentMap = payload.map || '';
+
+                select.innerHTML = maps.map((mapName) => `<option value="${escapeHtml(mapName)}">${escapeHtml(mapName)}</option>`).join('');
+                if (currentMap) {
+                    select.value = currentMap;
+                }
+
+                game.value = payload.user_game_ini || '';
+                engine.value = payload.user_engine_ini || '';
+
+                status.textContent = `Loaded ${currentMap || 'map'} config files.`;
+                status.className = 'font-mono text-xs text-emerald-400';
+            } catch (err) {
+                status.textContent = `Load failed: ${err.message || 'unknown error'}`;
+                status.className = 'font-mono text-xs text-rose-400';
+            }
+        }
+
+        async function saveMapConfigs() {
+            const status = document.getElementById('map-editor-status');
+            const select = document.getElementById('map-select');
+            const game = document.getElementById('user-game-ini');
+            const engine = document.getElementById('user-engine-ini');
+            const restartToggle = document.getElementById('map-restart-toggle');
+            if (!status || !select || !game || !engine) {
+                return;
+            }
+
+            const mapName = select.value;
+            if (!mapName) {
+                status.textContent = 'Choose a map before saving.';
+                status.className = 'font-mono text-xs text-amber-400';
+                return;
+            }
+
+            status.textContent = 'Saving map config files...';
+            status.className = 'font-mono text-xs text-slate-500';
+            try {
+                const response = await fetch('/api/system/map-configs', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        map: mapName,
+                        user_game_ini: game.value,
+                        user_engine_ini: engine.value,
+                    }),
+                });
+                const payload = await response.json();
+                if (!response.ok) {
+                    throw new Error(payload.message || 'save failed');
+                }
+
+                const restartAfterSave = Boolean(restartToggle && restartToggle.checked);
+                const restartTarget = mapNameToRestartTarget(mapName);
+
+                if (restartAfterSave && restartTarget) {
+                    status.textContent = `Saved ${mapName} config files. Restarting ${restartTarget}...`;
+                    await runDuneCommand('restart', restartTarget, `restart ${restartTarget}`);
+                    status.textContent = `Saved ${mapName} config files and triggered restart for ${restartTarget}.`;
+                    status.className = 'font-mono text-xs text-emerald-400';
+                } else if (restartAfterSave && !restartTarget) {
+                    status.textContent = `Saved ${mapName} config files. Restart not supported for this map from UI yet.`;
+                    status.className = 'font-mono text-xs text-amber-400';
+                } else {
+                    status.textContent = `Saved ${mapName} config files.`;
+                    status.className = 'font-mono text-xs text-emerald-400';
+                }
+            } catch (err) {
+                status.textContent = `Save failed: ${err.message || 'unknown error'}`;
+                status.className = 'font-mono text-xs text-rose-400';
+            }
+        }
+
+        function setQuickActionStatus(message, tone = 'normal') {
+            const node = document.getElementById('quick-actions-status');
+            if (!node) {
+                return;
+            }
+            node.textContent = message;
+            if (tone === 'success') {
+                node.className = 'font-mono text-xs text-emerald-400';
+            } else if (tone === 'error') {
+                node.className = 'font-mono text-xs text-rose-400';
+            } else if (tone === 'warn') {
+                node.className = 'font-mono text-xs text-amber-400';
+            } else {
+                node.className = 'font-mono text-xs text-slate-500';
+            }
+        }
+
+        function renderKeyValueBlock(title, values) {
+            const entries = Object.entries(values || {});
+            if (entries.length === 0) {
+                return '';
+            }
+            return `<section class="rounded-md border border-white/5 bg-black/20 p-3">
+                <p class="font-mono text-[10px] uppercase tracking-wider text-[#dfb743] mb-2">${escapeHtml(title)}</p>
+                <div class="grid gap-1 text-xs">${entries.map(([k, v]) => `<div class="flex justify-between gap-3"><span class="text-slate-500">${escapeHtml(k)}</span><span class="text-slate-200 text-right">${escapeHtml(v)}</span></div>`).join('')}</div>
+            </section>`;
+        }
+
+        function renderTableBlock(title, table) {
+            const headers = Array.isArray(table && table.headers) ? table.headers : [];
+            const rows = Array.isArray(table && table.rows) ? table.rows : [];
+            if (headers.length === 0 || rows.length === 0) {
+                return '';
+            }
+
+            const headerRow = headers.map((h) => `<th class="px-2 py-1 text-left">${escapeHtml(h)}</th>`).join('');
+            const bodyRows = rows.map((row) => `<tr class="border-t border-white/5">${headers.map((h) => `<td class="px-2 py-1 text-slate-300">${escapeHtml(row[h] || '')}</td>`).join('')}</tr>`).join('');
+
+            return `<section class="rounded-md border border-white/5 bg-black/20 p-3 overflow-x-auto">
+                <p class="font-mono text-[10px] uppercase tracking-wider text-[#dfb743] mb-2">${escapeHtml(title)}</p>
+                <table class="w-full min-w-[500px] font-mono text-[11px]">
+                    <thead class="text-slate-500 bg-white/[0.03]"><tr>${headerRow}</tr></thead>
+                    <tbody>${bodyRows}</tbody>
+                </table>
+            </section>`;
+        }
+
+        function renderReadyChecksBlock(parsed) {
+            const checks = Array.isArray(parsed && parsed.checks) ? parsed.checks : [];
+            if (checks.length === 0) {
+                return '';
+            }
+            const rows = checks.slice(0, 24).map((check) => {
+                const tone = check.state === 'OK' ? 'text-emerald-400' : (check.state === 'WAIT' ? 'text-amber-400' : 'text-rose-400');
+                return `<tr class="border-t border-white/5"><td class="px-2 py-1 text-slate-400">${escapeHtml(check.section || '')}</td><td class="px-2 py-1 ${tone}">${escapeHtml(check.state || '')}</td><td class="px-2 py-1 text-slate-300">${escapeHtml(check.message || '')}</td></tr>`;
+            }).join('');
+
+            return `<section class="rounded-md border border-white/5 bg-black/20 p-3 overflow-x-auto">
+                <p class="font-mono text-[10px] uppercase tracking-wider text-[#dfb743] mb-2">Readiness Checks</p>
+                <table class="w-full min-w-[500px] font-mono text-[11px]"><thead class="text-slate-500 bg-white/[0.03]"><tr><th class="px-2 py-1 text-left">Section</th><th class="px-2 py-1 text-left">State</th><th class="px-2 py-1 text-left">Message</th></tr></thead><tbody>${rows}</tbody></table>
+            </section>`;
+        }
+
+        function renderCommandSummary(parsed) {
+            const panel = document.getElementById('command-summary');
+            if (!panel) {
+                return;
+            }
+
+            if (!parsed || typeof parsed !== 'object') {
+                panel.classList.add('hidden');
+                panel.innerHTML = '';
+                return;
+            }
+
+            if (parsed.kind === 'status') {
+                panel.innerHTML = `<div class="grid gap-2">${[
+                    renderKeyValueBlock('Overview', parsed.overview),
+                    renderKeyValueBlock('Automation', parsed.automation),
+                    renderKeyValueBlock('Database', parsed.database),
+                    renderTableBlock('Containers', parsed.containers),
+                    renderTableBlock('Listeners', parsed.listeners),
+                    renderTableBlock('Game Servers', parsed.game_servers)
+                ].filter(Boolean).join('')}</div>`;
+                panel.classList.remove('hidden');
+                return;
+            }
+
+            if (parsed.kind === 'ready') {
+                panel.innerHTML = `<div class="grid gap-2">${[
+                    renderKeyValueBlock('Readiness', {
+                        Overall: parsed.overall || '--',
+                        OK: parsed.counts ? parsed.counts.OK : 0,
+                        WAIT: parsed.counts ? parsed.counts.WAIT : 0,
+                        FAIL: parsed.counts ? parsed.counts.FAIL : 0,
+                    }),
+                    renderReadyChecksBlock(parsed),
+                ].filter(Boolean).join('')}</div>`;
+                panel.classList.remove('hidden');
+                return;
+            }
+
+            if (parsed.kind === 'version') {
+                const sections = parsed.sections || {};
+                panel.innerHTML = `<div class="grid gap-2">${Object.entries(sections).map(([title, values]) => renderKeyValueBlock(title, values)).join('')}</div>`;
+                panel.classList.remove('hidden');
+                return;
+            }
+
+            panel.classList.add('hidden');
+            panel.innerHTML = '';
+        }
+
+        async function runQuickAction(label, commandId, args = '', options = {}) {
+            if (options.confirmMessage) {
+                const proceed = window.confirm(options.confirmMessage);
+                if (!proceed) {
+                    setQuickActionStatus(`${label} cancelled.`, 'warn');
+                    return;
+                }
+            }
+
+            setQuickActionStatus(`${label} is running...`, 'normal');
+            const result = await runDuneCommand(commandId, args, label);
+            if (!result) {
+                setQuickActionStatus(`${label} failed to start.`, 'error');
+                return;
+            }
+
+            if (result.ok) {
+                setQuickActionStatus(`${label} completed successfully.`, 'success');
+            } else {
+                setQuickActionStatus(`${label} completed with issues.`, 'warn');
+            }
+        }
+
+        function escapeHtml(value) {
+            return String(value || '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
+        function renderCommandsPanel() {
+            const panel = document.getElementById('commands-panel');
+            if (!panel) {
+                return;
+            }
+
+            if (!Array.isArray(duneCommands) || duneCommands.length === 0) {
+                panel.innerHTML = '<div class="rounded-xl border border-rose-900/40 bg-rose-950/20 p-4 text-rose-300 font-mono text-xs">No commands available.</div>';
+                return;
+            }
+
+            const grouped = {};
+            for (const cmd of duneCommands) {
+                if (!grouped[cmd.category]) {
+                    grouped[cmd.category] = [];
+                }
+                grouped[cmd.category].push(cmd);
+            }
+
+            panel.innerHTML = Object.entries(grouped).map(([category, commands], index) => {
+                const categoryKey = `cmd-category-${String(category || '').toLowerCase().replace(/[^a-z0-9]+/g, '-')}`;
+                const isOpen = index === 0;
+                const cards = commands.map((cmd) => {
+                    const needsArgs = cmd.arg_mode !== 'none';
+                    const hint = cmd.arg_hint ? `<p class="mt-2 text-[11px] text-slate-500">Args: ${escapeHtml(cmd.arg_hint)}</p>` : '';
+                    const input = needsArgs
+                        ? `<input data-command-input="${escapeHtml(cmd.id)}" type="text" class="mt-2 w-full rounded-lg border border-white/10 bg-black/30 px-3 py-2 font-mono text-xs text-slate-200 outline-none focus:border-[#dfb743]/40" placeholder="${escapeHtml(cmd.arg_hint || 'Arguments')}" />`
+                        : '';
+                    return `<article class="rounded-xl border border-white/5 bg-slate-950/60 p-4">
+                        <div class="flex items-start justify-between gap-3">
+                            <div>
+                                <p class="font-mono text-xs uppercase tracking-wider text-slate-300">${escapeHtml(cmd.label)}</p>
+                                <p class="mt-1 text-xs text-slate-500">${escapeHtml(cmd.description)}</p>
+                            </div>
+                            <button data-command-run="${escapeHtml(cmd.id)}" class="rounded-lg bg-white/[0.06] px-3 py-1.5 font-mono text-[11px] uppercase tracking-wider text-slate-200 hover:bg-white/[0.12] transition">Run</button>
+                        </div>
+                        ${hint}
+                        ${input}
+                    </article>`;
+                }).join('');
+
+                return `<section class="rounded-xl border border-white/5 bg-slate-950/40 p-4">
+                    <button type="button" data-accordion-toggle="${categoryKey}" aria-expanded="${isOpen ? 'true' : 'false'}" class="w-full flex items-center justify-between gap-3 text-left">
+                        <span class="font-mono text-[11px] uppercase tracking-[0.2em] text-[#dfb743]">${escapeHtml(category)}</span>
+                        <span class="inline-flex items-center gap-3">
+                            <span class="font-mono text-[10px] uppercase tracking-wider text-slate-500">${commands.length} cmd</span>
+                            <span data-accordion-icon class="font-mono text-xs text-slate-400 transition-transform ${isOpen ? 'rotate-180' : ''}">v</span>
+                        </span>
+                    </button>
+                    <div id="${categoryKey}" data-accordion-content class="mt-3 grid gap-3 ${isOpen ? '' : 'hidden'}">${cards}</div>
+                </section>`;
+            }).join('');
+        }
+
+        async function loadDuneCommands() {
+            const status = document.getElementById('commands-status');
+            if (status) {
+                status.textContent = 'Loading Dune command catalog...';
+                status.className = 'mb-3 font-mono text-xs text-slate-500';
+            }
+
+            try {
+                const response = await fetch('/api/system/commands');
+                if (!response.ok) {
+                    throw new Error('catalog request failed');
+                }
+                const payload = await response.json();
+                duneCommands = Array.isArray(payload.commands) ? payload.commands : [];
+                renderCommandsPanel();
+                if (status) {
+                    status.textContent = `Loaded ${duneCommands.length} commands.`;
+                    status.className = 'mb-3 font-mono text-xs text-emerald-400';
+                }
+            } catch (err) {
+                duneCommands = [];
+                renderCommandsPanel();
+                if (status) {
+                    status.textContent = 'Failed to load command catalog.';
+                    status.className = 'mb-3 font-mono text-xs text-rose-400';
+                }
+            }
+        }
+
+        async function runDuneCommand(commandId, argsOverride = null, labelOverride = '') {
+            const spec = duneCommands.find((cmd) => cmd.id === commandId) || { base_args: [commandId] };
+            if (!spec) {
+                return { ok: false, status: 0, payload: null };
+            }
+
+            const output = document.getElementById('command-output');
+            const meta = document.getElementById('command-run-meta');
+            const input = document.querySelector(`[data-command-input="${commandId}"]`);
+            const args = argsOverride !== null ? String(argsOverride).trim() : (input ? input.value.trim() : '');
+            const displayLabel = labelOverride || `${spec.base_args.join(' ')}${args ? ' ' + args : ''}`;
+
+            output.textContent = `Running: ${displayLabel}`;
+            meta.textContent = 'Running...';
+
+            try {
+                const response = await fetch('/api/system/command/run', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ command_id: commandId, args }),
+                });
+                const payload = await response.json();
+
+                if (!response.ok) {
+                    output.textContent = payload.message || 'Command failed to start.';
+                    meta.textContent = `HTTP ${response.status}`;
+                    meta.className = 'font-mono text-[11px] text-rose-400';
+                    renderCommandSummary(null);
+                    return { ok: false, status: response.status, payload };
+                }
+
+                output.textContent = payload.output || '(no output)';
+                renderCommandSummary(payload.parsed || null);
+                const ok = payload.success === true;
+                meta.textContent = `${ok ? 'PASS' : 'FAIL'} • exit ${payload.exit_code} • ${payload.duration_ms}ms`;
+                meta.className = 'font-mono text-[11px] ' + (ok ? 'text-emerald-400' : 'text-amber-400');
+                return { ok, status: response.status, payload };
+            } catch (err) {
+                output.textContent = 'Command request failed.';
+                meta.textContent = 'Request error';
+                meta.className = 'font-mono text-[11px] text-rose-400';
+                renderCommandSummary(null);
+                return { ok: false, status: 0, payload: null };
+            }
+        }
+
+        async function checkAuth() {
+            try {
+                const me = await fetch('/api/auth/me');
+                if (me.status === 401) {
+                    window.location.replace('/login.html');
+                    return;
+                }
+                const meData = await me.json();
+                if (!meData.authenticated) {
+                    window.location.replace('/login.html');
+                }
+            } catch(e) {
+                window.location.replace('/login.html');
+            }
+        }
+        
+        document.getElementById('logout-btn').addEventListener('click', async () => {
+            await fetch('/api/admin/logout', { method: 'POST' });
+            window.location.replace('/');
+        });
+
+        document.querySelectorAll('.view-nav-btn').forEach((button) => {
+            button.addEventListener('click', () => {
+                const view = button.getAttribute('data-view-nav') || 'dashboard';
+                switchView(view);
+            });
+        });
+
+        window.addEventListener('hashchange', () => {
+            const requested = window.location.hash.replace('#', '').trim();
+            if (requested && requested !== currentView) {
+                switchView(requested);
+            }
+        });
+
+        document.getElementById('commands-refresh-btn').addEventListener('click', loadDuneCommands);
+        document.getElementById('commands-panel').addEventListener('click', function (event) {
+            const target = event.target;
+            if (!(target instanceof HTMLElement)) {
+                return;
+            }
+
+            const toggleButton = target.closest('[data-accordion-toggle]');
+            if (toggleButton instanceof HTMLElement) {
+                const contentId = toggleButton.getAttribute('data-accordion-toggle');
+                if (!contentId) {
+                    return;
+                }
+
+                const panel = document.getElementById('commands-panel');
+                if (!panel) {
+                    return;
+                }
+
+                const currentExpanded = toggleButton.getAttribute('aria-expanded') === 'true';
+                const nextExpanded = !currentExpanded;
+
+                panel.querySelectorAll('[data-accordion-toggle]').forEach((node) => {
+                    if (!(node instanceof HTMLElement)) {
+                        return;
+                    }
+                    const nodeContentId = node.getAttribute('data-accordion-toggle');
+                    if (!nodeContentId) {
+                        return;
+                    }
+                    const contentNode = panel.querySelector(`#${nodeContentId}`);
+                    const iconNode = node.querySelector('[data-accordion-icon]');
+
+                    if (nodeContentId === contentId) {
+                        node.setAttribute('aria-expanded', nextExpanded ? 'true' : 'false');
+                        if (contentNode instanceof HTMLElement) {
+                            contentNode.classList.toggle('hidden', !nextExpanded);
+                        }
+                        if (iconNode instanceof HTMLElement) {
+                            iconNode.classList.toggle('rotate-180', nextExpanded);
+                        }
+                    } else {
+                        node.setAttribute('aria-expanded', 'false');
+                        if (contentNode instanceof HTMLElement) {
+                            contentNode.classList.add('hidden');
+                        }
+                        if (iconNode instanceof HTMLElement) {
+                            iconNode.classList.remove('rotate-180');
+                        }
+                    }
+                });
+                return;
+            }
+
+            const commandButton = target.closest('[data-command-run]');
+            if (!(commandButton instanceof HTMLElement)) {
+                return;
+            }
+            const commandId = commandButton.getAttribute('data-command-run');
+            if (!commandId) {
+                return;
+            }
+            runDuneCommand(commandId);
+        });
+        document.getElementById('containers-body').addEventListener('click', function (event) {
+            const target = event.target;
+            if (!(target instanceof HTMLElement)) {
+                return;
+            }
+
+            const logsService = target.getAttribute('data-container-logs');
+            if (logsService) {
+                runDuneCommand('logs', logsService, `logs ${logsService}`);
+                return;
+            }
+
+            const restartTarget = target.getAttribute('data-container-restart');
+            if (restartTarget) {
+                runDuneCommand('restart', restartTarget, `restart ${restartTarget}`);
+            }
+        });
+        document.getElementById('map-load-btn').addEventListener('click', () => loadMapConfigs());
+        document.getElementById('map-save-btn').addEventListener('click', saveMapConfigs);
+        document.getElementById('map-select').addEventListener('change', () => loadMapConfigs());
+        document.getElementById('quick-restart-btn').addEventListener('click', () => {
+            const target = document.getElementById('quick-restart-target').value;
+            runQuickAction(`Restart ${target}`, 'restart', target, {
+                confirmMessage: `Restart ${target}? This may disconnect players.`
+            });
+        });
+        document.getElementById('quick-logs-btn').addEventListener('click', () => {
+            const service = document.getElementById('quick-logs-service').value;
+            const raw = document.getElementById('quick-logs-raw').checked;
+            const args = raw ? `${service} --raw` : service;
+            runQuickAction(`Logs ${service}`, 'logs', args);
+        });
+        document.getElementById('quick-db-backup-btn').addEventListener('click', () => {
+            const outputDir = document.getElementById('quick-db-output').value.trim();
+            const args = outputDir ? `backup "${outputDir}"` : 'backup';
+            runQuickAction('Database backup', 'db', args, {
+                confirmMessage: 'Run a new database backup now?'
+            });
+        });
+        document.getElementById('quick-doctor-btn').addEventListener('click', () => {
+            runQuickAction('Doctor check', 'doctor', '');
+        });
+        document.getElementById('quick-stop-btn').addEventListener('click', () => {
+            runQuickAction('Stop battlegroup', 'stop', '', {
+                confirmMessage: 'Stop the entire battlegroup now?'
+            });
+        });
+
+        checkAuth();
+        switchView(window.location.hash.replace('#', '').trim() || 'dashboard');
+        refreshStats();
+        setInterval(refreshStats, 15000);
+        refreshDatabaseInsights();
+        setInterval(refreshDatabaseInsights, 20000);
+        refreshContainers();
+        setInterval(refreshContainers, 10000);
+        loadMapConfigs();
+        loadDuneCommands();
+    </script>
+</body>
+</html>

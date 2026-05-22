@@ -1,0 +1,11 @@
+{
+  "name": "kanly-admin",
+  "private": true,
+  "devDependencies": {
+    "tailwindcss": "^3.4.4"
+  },
+  "scripts": {
+    "build:css": "npx tailwindcss -i ./static/src.css -o ./static/style.css --minify",
+    "watch:css": "npx tailwindcss -i ./static/src.css -o ./static/style.css --watch"
+  }
+}

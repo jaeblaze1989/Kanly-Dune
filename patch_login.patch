@@ -1,0 +1,19 @@
+--- main.go
++++ main.go
+@@ -192,6 +192,15 @@
+ 		return
+ 	}
+ 
++	token := generateSessionToken()
++	appDB.Exec("INSERT INTO admin_sessions (token, created_at) VALUES (?, ?)", token, time.Now().UTC().Format(time.RFC3339))
++	http.SetCookie(w, &http.Cookie{
++		Name:     "kanly_session",
++		Value:    token,
++		Path:     "/",
++		HttpOnly: true,
++		SameSite: http.SameSiteLaxMode,
++	})
++
+ 	jsonResponse(w, genericResponse{Success: true, Message: "login successful"})
+ }
+ 
