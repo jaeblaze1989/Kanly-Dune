@@ -36,6 +36,8 @@ Then open:
 http://localhost:60000
 ```
 
+If you want access from outside this machine/network, open TCP port `60000` in your firewall/router (or whatever custom port you set with `KANLY_PORT`).
+
 On first launch, create your admin account and sign in.
 
 ## Install From GitHub
