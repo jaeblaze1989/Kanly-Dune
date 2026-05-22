@@ -36,7 +36,7 @@ Then open:
 http://localhost:60000
 ```
 
-If you want access from outside this machine/network, open TCP port `60000` in your firewall/router (or whatever custom port you set with `KANLY_PORT`).
+If you want access from outside this machine/network, open TCP port `60000` in your firewall/router.
 
 On first launch, create your admin account and sign in.
 
@@ -55,6 +55,41 @@ Then open:
 
 ```text
 http://localhost:60000
+```
+
+Or pull and run the prebuilt image directly:
+
+```bash
+docker pull ghcr.io/jaeblaze1989/kanly-manager:sha-55098c9
+```
+
+```bash
+docker run -d \
+	--name kanly-admin \
+	--restart unless-stopped \
+	-p 60000:60000 \
+	-e PORT=60000 \
+	-e KANLY_DUNE_ROOT=/dune \
+	-e KANLY_DB_PATH=/app/data/kanly.db \
+	-v "$PWD/.kanly-data:/app/data" \
+	-v "/srv/kanly/server/dune-awakening-selfhost-docker:/dune" \
+	-v /var/run/docker.sock:/var/run/docker.sock \
+	ghcr.io/jaeblaze1989/kanly-manager:sha-55098c9
+```
+
+Open:
+
+```text
+http://localhost:60000
+```
+
+Helpful commands for this mode:
+
+```bash
+docker logs -f kanly-admin
+docker stop kanly-admin
+docker start kanly-admin
+docker rm -f kanly-admin
 ```
 
 ## Daily Use
@@ -82,16 +117,6 @@ If yours is different, run install like this:
 ```bash
 KANLY_DUNE_ROOT=/your/path/to/dune-awakening-selfhost-docker ./setup-docker.sh install
 ```
-
-## If Port 60000 Is Already In Use
-
-Use a different port:
-
-```bash
-KANLY_PORT=61000 ./setup-docker.sh install
-```
-
-Then open `http://localhost:61000`.
 
 ## Where Your Kanly Data Is Stored
 
