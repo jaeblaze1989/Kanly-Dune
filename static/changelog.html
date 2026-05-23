@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Kanly Changelog</title>
+    <link rel="stylesheet" href="/style.css" />
+</head>
+<body class="min-h-screen bg-[#030508] text-slate-100 antialiased font-sans relative overflow-x-hidden flex flex-col justify-between">
+    <div class="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_0%_0%,_rgba(223,183,67,0.12),_transparent_45%)]"></div>
+    <div class="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_100%_100%,_rgba(255,107,0,0.08),_transparent_40%)]"></div>
+    <div class="pointer-events-none absolute inset-0 opacity-[0.015]" style="background-image: linear-gradient(#fff 1px, transparent 1px), linear-gradient(90deg, #fff 1px, transparent 1px); background-size: 40px 40px;"></div>
+
+    <header class="relative w-full px-6 pt-8 lg:px-8">
+        <div class="flex items-center justify-between gap-3">
+            <a href="/" class="inline-flex items-center gap-2 rounded-xl border border-white/5 bg-white/[0.02] px-4 py-2.5 font-mono text-xs uppercase tracking-wider text-slate-400 backdrop-blur-sm transition hover:border-white/10 hover:bg-white/5 hover:text-white">
+                <span aria-hidden="true">&larr;</span> Terminal Home
+            </a>
+            <a href="/dashboard.html" class="inline-flex items-center gap-2 rounded-xl border border-white/5 bg-white/[0.02] px-4 py-2.5 font-mono text-xs uppercase tracking-wider text-slate-400 backdrop-blur-sm transition hover:border-white/10 hover:bg-white/5 hover:text-white">
+                Open Dashboard
+            </a>
+        </div>
+    </header>
+
+    <main class="relative w-full px-6 py-8 flex-1 lg:px-8">
+        <section class="rounded-[2rem] border border-white/5 bg-slate-950/60 p-6 sm:p-8 lg:p-10 shadow-[0_40px_120px_rgba(0,0,0,0.8)] backdrop-blur-xl">
+            <p class="font-mono text-[#dfb743] mb-3 tracking-widest text-sm">RELEASE NOTES</p>
+            <h1 class="text-3xl md:text-4xl font-bold tracking-tight text-white mb-3">Kanly Changelog</h1>
+            <p class="text-slate-400 max-w-3xl">Highlights of changes shipped in the latest update cycle.</p>
+
+            <div class="mt-8 grid gap-4">
+                <article class="rounded-xl border border-white/5 bg-slate-950/50 p-5">
+                    <div class="flex items-center justify-between gap-3 mb-3">
+                        <h2 class="font-mono text-sm uppercase tracking-[0.25em] text-slate-100">v1.2.0</h2>
+                        <span class="font-mono text-xs text-slate-500">2026-05-23</span>
+                    </div>
+                    <ul class="space-y-2 text-sm text-slate-200">
+                        <li>Added dashboard quick action to check for Git updates directly from the control panel.</li>
+                        <li>Added authenticated API endpoint <span class="font-mono">/api/system/update/check</span> with branch and commit comparison details.</li>
+                        <li>Made update checks read-only-safe by comparing local commits against <span class="font-mono">origin</span> using <span class="font-mono">git ls-remote</span>.</li>
+                        <li>Container runtime now includes Git and mounts the Kanly repo for in-app update visibility.</li>
+                        <li>Fixed server command execution environment by installing Bash in the runtime image.</li>
+                    </ul>
+                </article>
+
+                <article class="rounded-xl border border-white/5 bg-slate-950/50 p-5">
+                    <div class="flex items-center justify-between gap-3 mb-3">
+                        <h2 class="font-mono text-sm uppercase tracking-[0.25em] text-slate-200">v1.1.0</h2>
+                        <span class="font-mono text-xs text-slate-500">2026-05-23</span>
+                    </div>
+                    <ul class="space-y-2 text-sm text-slate-300">
+                        <li>Dashboard and auth pages now use full-width page shells for a wider workspace layout.</li>
+                        <li>Removed Director API polling and the Director API tab from the dashboard to keep monitoring database-first.</li>
+                        <li><span class="font-mono">setup-docker.sh install</span> now prompts for the dune-awakening-selfhost-docker path when <span class="font-mono">KANLY_DUNE_ROOT</span> is not set.</li>
+                        <li>README now recommends Install From GitHub as the primary installation flow.</li>
+                        <li>Added <span class="font-mono">setup-docker.sh update</span> to self-update from Git (fast-forward), rebuild, and restart Kanly.</li>
+                    </ul>
+                </article>
+
+                <article class="rounded-xl border border-white/5 bg-slate-950/40 p-5">
+                    <div class="flex items-center justify-between gap-3 mb-3">
+                        <h2 class="font-mono text-sm uppercase tracking-[0.25em] text-slate-300">v1.0.0</h2>
+                        <span class="font-mono text-xs text-slate-500">Initial release</span>
+                    </div>
+                    <ul class="space-y-2 text-sm text-slate-400">
+                        <li>Go-based Kanly Manager with auth setup/login flow.</li>
+                        <li>Dashboard modules for host stats, containers, map INI editing, database insights, and command execution.</li>
+                    </ul>
+                </article>
+            </div>
+        </section>
+    </main>
+
+    <footer class="w-full text-center pb-8 font-mono text-[10px] text-slate-600 tracking-wider">
+        BY ORDER OF THE IMPERIAL THRONE // KANLY STACK V1.2.0<br>
+        This project is not affiliated with, endorsed by, sponsored by, or supported by Funcom.
+    </footer>
+</body>
+</html>

@@ -15,11 +15,12 @@ COPY --from=css /src/static/style.css /src/static/style.css
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -trimpath -ldflags="-s -w" -o /out/kanly-admin .
 
 FROM alpine:3.20
-RUN apk add --no-cache ca-certificates docker-cli
+RUN apk add --no-cache ca-certificates docker-cli git bash
 WORKDIR /app
 COPY --from=builder /out/kanly-admin /app/kanly-admin
 RUN mkdir -p /app/data
 ENV PORT=60000
 ENV KANLY_DB_PATH=/app/data/kanly.db
+ENV KANLY_REPO_DIR=/kanly-repo
 EXPOSE 60000
 ENTRYPOINT ["/app/kanly-admin"]

@@ -515,6 +515,7 @@ func createSessionEndpoints(mux *http.ServeMux) {
 	mux.HandleFunc("/api/admin/logout", logoutAdminHandler)
 	mux.HandleFunc("/api/auth/me", authMeHandler)
 	mux.HandleFunc("/api/system/initialize", initializeSystemHandler)
+	mux.HandleFunc("/api/system/update/check", systemUpdateCheckHandler)
 	mux.HandleFunc("/api/system/stats", systemStatsHandler)
 	mux.HandleFunc("/api/system/containers", systemContainersHandler)
 	mux.HandleFunc("/api/system/database/insights", systemDatabaseInsightsHandler)
@@ -650,6 +651,122 @@ func initializeSystemHandler(w http.ResponseWriter, r *http.Request) {
 		"dune_root": duneRoot,
 		"checks":    checks,
 	})
+}
+
+func systemUpdateCheckHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		clientError(w, http.StatusMethodNotAllowed, "only GET is allowed")
+		return
+	}
+
+	authenticated, err := sessionAuthenticated(r)
+	if err != nil {
+		internalServerError(w, err)
+		return
+	}
+	if !authenticated {
+		clientError(w, http.StatusUnauthorized, "authentication required")
+		return
+	}
+
+	status, err := checkGitUpdateStatus()
+	if err != nil {
+		clientError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	jsonResponse(w, map[string]any{
+		"success":          true,
+		"message":          status["message"],
+		"repo_dir":         status["repo_dir"],
+		"branch":           status["branch"],
+		"current_commit":   status["current_commit"],
+		"remote_commit":    status["remote_commit"],
+		"ahead_by":         status["ahead_by"],
+		"behind_by":        status["behind_by"],
+		"update_available": status["update_available"],
+		"checked_at":       time.Now().UTC().Format(time.RFC3339),
+	})
+}
+
+func checkGitUpdateStatus() (map[string]any, error) {
+	repoDir := strings.TrimSpace(os.Getenv("KANLY_REPO_DIR"))
+	if repoDir == "" {
+		repoDir = "/kanly-repo"
+	}
+
+	if _, err := os.Stat(repoDir); err != nil {
+		return nil, fmt.Errorf("repo path not available in container: %s", repoDir)
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 25*time.Second)
+	defer cancel()
+
+	runGit := func(args ...string) (string, error) {
+		cmd := exec.CommandContext(ctx, "git", args...)
+		cmd.Dir = repoDir
+		out, err := cmd.CombinedOutput()
+		message := strings.TrimSpace(string(out))
+		if err != nil {
+			if message == "" {
+				message = err.Error()
+			}
+			return "", fmt.Errorf("%s", message)
+		}
+		return message, nil
+	}
+
+	insideWorkTree, err := runGit("rev-parse", "--is-inside-work-tree")
+	if err != nil || strings.TrimSpace(insideWorkTree) != "true" {
+		if err != nil {
+			return nil, fmt.Errorf("git check failed: %s", err.Error())
+		}
+		return nil, fmt.Errorf("path is not a git checkout: %s", repoDir)
+	}
+
+	branch, err := runGit("rev-parse", "--abbrev-ref", "HEAD")
+	if err != nil {
+		return nil, fmt.Errorf("failed to detect branch: %s", err.Error())
+	}
+	if branch == "HEAD" {
+		return nil, fmt.Errorf("detached HEAD detected; checkout a branch first")
+	}
+
+	currentCommit, err := runGit("rev-parse", "HEAD")
+	if err != nil {
+		return nil, fmt.Errorf("failed to read local commit: %s", err.Error())
+	}
+
+	remoteRef := "refs/heads/" + branch
+	remoteLine, err := runGit("ls-remote", "--heads", "origin", remoteRef)
+	if err != nil {
+		return nil, fmt.Errorf("failed to query remote branch %s: %s", remoteRef, err.Error())
+	}
+
+	lineParts := strings.Fields(remoteLine)
+	if len(lineParts) == 0 {
+		return nil, fmt.Errorf("remote branch not found: %s", remoteRef)
+	}
+	remoteCommit := strings.TrimSpace(lineParts[0])
+
+	updateAvailable := strings.TrimSpace(currentCommit) != remoteCommit
+	aheadBy := 0
+	behindBy := 0
+	message := "Kanly is up to date with origin/" + branch
+	if updateAvailable {
+		message = "Update available: local and remote commits differ on origin/" + branch
+	}
+
+	return map[string]any{
+		"repo_dir":         repoDir,
+		"branch":           branch,
+		"current_commit":   currentCommit,
+		"remote_commit":    remoteCommit,
+		"ahead_by":         aheadBy,
+		"behind_by":        behindBy,
+		"update_available": updateAvailable,
+		"message":          message,
+	}, nil
 }
 
 func resolveDuneRoot() (string, initCheckResult) {

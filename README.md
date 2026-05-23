@@ -2,6 +2,8 @@
 
 Kanly Manager is a web control panel for your Dune self-host server stack.
 
+Current release: `v1.2.0`
+
 Required Dune package:
 
 - https://github.com/Red-Blink/dune-awakening-selfhost-docker
@@ -21,11 +23,13 @@ You need:
 2. A working Dune self-host package folder on this machine.
 3. Terminal access on the same host where Dune is running.
 
-## Install (Recommended)
+## Install From GitHub (Recommended)
 
-Open a terminal in this folder and run:
+If you are starting from scratch:
 
 ```bash
+git clone https://github.com/jaeblaze1989/Kanly-Dune.git
+cd Kanly-Dune/services/kanly-admin
 chmod +x setup-docker.sh
 ./setup-docker.sh install
 ```
@@ -40,13 +44,11 @@ If you want access from outside this machine/network, open TCP port `60000` in y
 
 On first launch, create your admin account and sign in.
 
-## Install From GitHub
+## Local Install (Existing Checkout)
 
-If you are starting from scratch:
+If you already have this repository on the host, open a terminal in this folder and run:
 
 ```bash
-git clone https://github.com/jaeblaze1989/Kanly-Dune.git
-cd Kanly-Dune/services/kanly-admin
 chmod +x setup-docker.sh
 ./setup-docker.sh install
 ```
@@ -100,11 +102,29 @@ Useful commands:
 ./setup-docker.sh status
 ./setup-docker.sh logs
 ./setup-docker.sh restart
+./setup-docker.sh update
 ./setup-docker.sh stop
 ./setup-docker.sh start
 ```
 
-## If Your Dune Folder Is In A Different Location
+## Update From Git
+
+To self-update Kanly Manager from your current Git branch and redeploy:
+
+```bash
+./setup-docker.sh update
+```
+
+What this does:
+
+1. Verifies the checkout is clean (no uncommitted changes).
+2. Runs a fast-forward `git pull` from `origin` on the current branch.
+3. Rebuilds the Docker image.
+4. Restarts the `kanly-admin` container.
+
+If your repo has local changes, the update command stops and asks you to commit or stash first.
+
+## Dune Folder Path
 
 By default, setup expects:
 
@@ -117,6 +137,8 @@ If yours is different, run install like this:
 ```bash
 KANLY_DUNE_ROOT=/your/path/to/dune-awakening-selfhost-docker ./setup-docker.sh install
 ```
+
+If `KANLY_DUNE_ROOT` is not set, `./setup-docker.sh install` now prompts for the folder path interactively.
 
 ## Where Your Kanly Data Is Stored
 
